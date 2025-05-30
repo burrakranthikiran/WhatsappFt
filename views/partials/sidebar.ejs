@@ -1,0 +1,78 @@
+<div class="sidebar bg-dark text-white p-3">
+    <p class="text-center" style="font-size: 15px;" id="user_id"></p>
+    <img src="./images/panda.png" alt="Panda" style="width: 200px;">
+   
+    <ul class="nav flex-column" style="margin-top: 10px;">
+        <li class="nav-item">
+            <a href="/dashboardNew" class="nav-link text-white"><i class="fas fa-home"></i>Dashboard</a>
+        </li>
+        <li class="nav-item access-control" data-module="pan-india">
+            <a href="/pan-india-screen" class="nav-link text-white"><i class="fas fa-user"></i>Pan India</a>
+        </li>
+        <li class="nav-item access-control" data-module="personal">
+            <a href="/personal-screen" class="nav-link text-white"><i class="fas fa-user"></i>Personal</a>
+        </li>
+        <li class="nav-item access-control" data-module="bsp">
+            <a href="/bsp-party-screen" class="nav-link text-white"><i class="fas fa-user"></i>BSP</a>
+        </li>
+        <li class="nav-item">
+            <a href="javascript:logout()" class="nav-link text-white"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </li>
+    </ul>
+</div>
+
+<script>
+  async function fetchdata() {
+    
+      const id = localStorage.getItem("user_id");
+      if (!id) {
+          alert('User not logged in.');
+          window.location.href = "/login";
+          return;
+      }
+
+      try {
+          const response = await fetch('https://whatsappserver.apbsp.com/login/viewbyid', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id: id })
+          });
+
+          if (!response.ok) throw new Error("Error fetching data");
+
+          const data = await response.json();
+          console.log("KKKKKKKKKKKkk",data);
+          document.getElementById('user_id').innerText = "Welcome Back to"+ "  "+data.username;
+          localStorage.setItem("user_modules", JSON.stringify(data.loginaccesstables.map(m => m.module)));
+          updateSidebar();
+      } catch (error) {
+          console.error('Error:', error);
+          alert('Failed to fetch user data.');
+      }
+  }
+
+  function updateSidebar() {
+      const userModules = JSON.parse(localStorage.getItem("user_modules")) || [];
+      document.querySelectorAll('.access-control').forEach(item => {
+          const module = item.getAttribute('data-module');
+          if (!userModules.includes(module)) {
+              item.style.display = "none";
+          }
+      });
+  }
+
+  function logout() {
+      fetch('/logout', { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+          .then(() => {
+              localStorage.clear();
+              window.location.href = '/login';
+          })
+          .catch(error => {
+              console.error('Error logging out:', error);
+              alert("Logout failed.");
+          });
+  }
+
+  // Run fetchdata on page load
+  fetchdata();
+</script>

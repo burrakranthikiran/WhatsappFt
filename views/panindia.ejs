@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pan India</title>
+  <!-- Bootstrap CSS -->
+  <link 
+    rel="stylesheet" 
+    href="https://stackpath.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+    crossorigin="anonymous"
+  >
+  <style>
+      .sidebar {
+    width: 250px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+.content {
+    margin-left: 250px;
+    flex-grow: 1;
+}
+
+.nav-link {
+    font-size: 18px;
+    padding: 10px;
+}
+
+.nav-link i {
+    margin-right: 10px;
+}
+
+.nav-link:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+}
+    /* Set fixed height for table body with scrolling */
+    .table-container {
+      padding-left: 250px;
+      margin: 50px;
+      max-height: 500px; /* Set the fixed height */
+      overflow-y: auto;  /* Enable vertical scrolling if content exceeds max height */
+    }
+
+    /* Make the table header fixed */
+    .table thead th {
+      position: sticky;
+      top: 0; /* Keep it at the top */
+      z-index: 1; /* Ensure it stays above the body */
+      background-color: #343a40; /* Add background to header to differentiate */
+    }
+
+    /* Optional: Add a little padding to make the table look better */
+    .table th, .table td {
+      vertical-align: middle;
+    }
+
+    .container {
+    display: flex;
+    justify-content: center;
+   
+    
+  }
+
+  textarea {
+    margin-top: 50px;
+    width: 80%; /* Adjust the width as needed */
+    height: 200px; /* Adjust the height as needed */
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  input {
+    margin-top: 50px;
+
+    padding: 10px;
+    font-size: 16px;
+   
+  
+  }
+
+  .footer-buttons {
+    text-align: center;
+    margin-top: 20px;
+  }
+  .container-count {
+    margin-top: 25px;
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Add this line to center vertically */
+}
+  </style>
+</head>
+<body>
+  <%- include('partials/sidebar') %>
+  <script>
+    // Ensure fetchdata() runs when the page loads
+    window.onload = fetchdata;
+  </script>
+  <div class="container-count">
+    <div id="statusText" style="margin-top: 15px; font-size: 16px;"></div>
+    <br>
+    <br>
+    <b>
+      <p id="count-number" style="font-size: 25px;"></p>
+    </b>
+
+  </div>
+ 
+<div class="container">
+  <textarea placeholder="Enter your message here"></textarea>
+  <input type="file" id="fileInput" accept=".png, .jpeg, .jpg" onchange="checkImageSize(this)">
+
+</div>
+  <!-- Table Container with Fixed Height -->
+  <div class="table-container">
+    <table class="table">
+      <thead class="thead-dark">
+        <tr>
+        
+          <th scope="col">Phone Number</th>
+        </tr>
+      </thead>
+      <tbody id="phoneTableBody">
+        <!-- Phone numbers will be dynamically added here -->
+      </tbody>
+    </table>
+  </div>
+  <div class="footer-buttons">
+    <!-- <button  class="btn btn-danger" onclick="previousPage()">Previous</button> -->
+    <!-- <button  class="btn btn-success my-2 my-sm-0" onclick="nextPage()">More</button> -->
+    <button class="btn btn-outline-success my-2 my-sm-0" type="submit" onclick="sendmessages()">Send Messages</button>
+  </div>
+
+  <!-- Bootstrap JS and dependencies -->
+  <script 
+    src="https://code.jquery.com/jquery-3.2.1.slim.min.js" 
+    integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" 
+    crossorigin="anonymous">
+  </script>
+  <script 
+    src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" 
+    integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9JoAPpSa0z9I603Ct9r47jBWg9kQtQnx6D6/J" 
+    crossorigin="anonymous">
+  </script>
+  <script 
+    src="https://stackpath.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" 
+    integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" 
+    crossorigin="anonymous">
+  </script>
+
+  <script>
+  let phonenumberLog;
+  let lastnumber;
+  let base64data = "Empty";
+  let phoneNumbersArray = [];
+  let count = 0;
+  function revgeneratePhoneNumbers(start, end, callback) {
+      let current = BigInt(start); // Use BigInt for large numbers
+      const stop = BigInt(end);
+
+      while (current <= stop) {
+        callback(current.toString()); // Process the number and convert to string
+        current--;
+      }
+    }
+   function generatePhoneNumbers(start, end, callback) {
+      let current = BigInt(start); // Use BigInt for large numbers
+      const stop = BigInt(end);
+
+      while (current >= stop) {
+        callback(current.toString()); // Process the number and convert to string
+        current--;
+      }
+    }
+
+    // Usage
+    const startNumber = "9999999999";
+    let endNumber = (BigInt(startNumber) - 5000n).toString();
+
+    // Update the table directly without batching
+    function updateTable(phoneNumber) {
+      lastnumber = phoneNumber
+      
+      const tableBody = document.getElementById('phoneTableBody');
+      const row = document.createElement('tr');
+      row.innerHTML = `<td>${phoneNumber}</td>`;
+      tableBody.appendChild(row);
+      phoneNumbersArray.push(phoneNumber);
+    }
+
+    // Start generating and updating the table without batching
+    generatePhoneNumbers(startNumber, endNumber, updateTable);
+
+
+    function previousPage(){
+      const tableBody = document.getElementById('phoneTableBody');
+        
+        // Clear the existing rows in the table body
+        tableBody.innerHTML = '';
+        
+        const startNumber = lastnumber;
+        let endNumber = (BigInt(startNumber) + 5000n).toString();
+       revgeneratePhoneNumbers(startNumber, endNumber, updateTable);
+  
+    }
+
+    function nextPage() {
+        const tableBody = document.getElementById('phoneTableBody');
+        
+        // Clear the existing rows in the table body
+        tableBody.innerHTML = '';
+        phoneNumbersArray =[];
+        
+        const startNumber = lastnumber;
+        let endNumber = (BigInt(startNumber) - 5000n).toString();
+        generatePhoneNumbers(startNumber, endNumber, updateTable);
+        if(lastnumber != "6000000000"){
+            sendmessages();
+        }
+       
+        console.log("333333333333", lastnumber);
+  }
+  
+  // send Message Api
+
+
+  function sendmessages() {
+    Log();
+    const textarea = document.querySelector('textarea');
+     console.log(phoneNumbersArray)
+     count += phoneNumbersArray.length;
+  console.log("count", count);
+  document.getElementById("count-number").textContent = "Message Delivery Count: " + count;
+    // Get the input text from the textarea
+    const inputText = textarea.value;
+
+    const jsonData = {
+        message: inputText,
+        imagebase64: base64data,
+        phoneNumbersArray: phoneNumbersArray,
+    };
+    // Make an AJAX request to the server to get the scan status using the GET method
+    fetch('/pan-india-send-message', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(jsonData)
+    })
+
+    .then(response => {
+         console.log("3333333333333", response);
+        if (response.status === 200) {
+          nextPage();
+          // alert("WhatsApp client is not ready. Please log in first.");
+        }
+        return response.json();
+    })
+  
+    .catch(error => {
+        console.error('Error checking scan status', error);
+    });
+
+    // Prevent the default form submission behavior
+    event.preventDefault();
+  }
+
+  // File Conversion 
+
+       // Get the input element for file selection
+const inputElement = document.querySelector('input[type="file"]');
+
+// Listen for the 'change' event when a file is selected
+inputElement.addEventListener('change', (event) => {
+    const file = event.target.files[0]; // Get the selected file
+
+    // Create a new FileReader
+    const reader = new FileReader();
+
+    // Define a function to handle the file reading
+    reader.onload = function() {
+        const base64String = reader.result.split(',')[1]; // Extract the base64 data
+        console.log("3333333333333333",base64String)
+        // base64data = base64String;
+
+        // Now you can use the 'blobUrl' variable which contains the Blob URL
+    };
+
+    // Read the file as a data URL which will trigger the onload function
+    reader.readAsDataURL(file);
+});
+
+// Function to convert base64 to Blob
+function b64toBlob(b64Data, contentType='', sliceSize=512) {
+    const byteCharacters = atob(b64Data);
+    const byteArrays = [];
+
+    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+        const slice = byteCharacters.slice(offset, offset + sliceSize);
+
+        const byteNumbers = new Array(slice.length);
+        for (let i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+        }
+
+        const byteArray = new Uint8Array(byteNumbers);
+        byteArrays.push(byteArray);
+    }
+
+    const blob = new Blob(byteArrays, {type: contentType});
+    return blob;
+}
+function checkImageSize(input) {
+    const file = input.files[0]; // Get the selected file
+    const formData = new FormData();
+    formData.append('image', file);
+
+    // Make an AJAX request to upload the image
+    fetch('/upload-image', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to upload image');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Image uploaded successfully:', data);
+        base64data = data.filename;
+    })
+    .catch(error => {
+        console.error('Error uploading image:', error);
+    });
+}
+function onload(){
+        let user_id = localStorage.getItem("user_id")
+        console.log("user_id", user_id)
+        if(user_id === null){
+            window.location.href = '/login';
+        }
+    }
+    onload();
+
+
+    function Log() {
+   
+   const textarea = document.querySelector('textarea');
+   // Get the input text from the textarea
+   const inputText = textarea.value;
+
+   const jsonData = {
+       message: inputText,
+       filename: base64data,
+       logintableId: localStorage.getItem("user_id"),
+       phonenumber: phonenumberLog,
+   };
+   const domain = 'https://whatsappserver.apbsp.com/log/create';
+   // Make an AJAX request to the server to get the scan status using the GET method
+   fetch(domain, {
+       method: 'POST',
+       headers: {
+           'Content-Type': 'application/json'
+       },
+       body: JSON.stringify(jsonData)
+   })
+
+   .then(response => {
+        console.log("response", response);
+       return response.json();
+   })
+ 
+   .catch(error => {
+       console.error('Error checking scan status', error);
+   });
+
+   // Prevent the default form submission behavior
+   event.preventDefault();
+ }
+  </script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script src="../socket.io/socket.io.js"></script>
+    <script>
+
+        const socket = io();
+        socket.on('whatsapp-status', (data) => {
+            if (data.scanned) {
+              phonenumberLog = data.clientphone;
+                document.getElementById("statusText").innerHTML = `
+                    <p><strong>Status:</strong> Scanned ✅</p>
+                    <p><strong>Client Name:</strong> ${data.clientname}</p>
+                    <p><strong>Client Phone:</strong> ${data.clientphone}</p>
+                `;
+            } else {
+                document.getElementById("statusText").innerHTML = "<p>Status: Not Scanned ❌</p>";
+            }
+        });
+        socket.on('whatsapp-ready', (data) => {
+            console.log("WhatsApp Web is ready! Reloading dashboard...");
+            console.log("data", data)
+            if (data.scanned) {
+                document.getElementById("statusText").innerHTML = `
+                    <p><strong>Status:</strong> Scanned ✅</p>
+                    <p><strong>Client Name:</strong> ${data.clientname}</p>
+                    <p><strong>Client Phone:</strong> ${data.clientphone}</p>
+                `;
+            } else {
+                document.getElementById("statusText").innerHTML = "<p>Status: Not Scanned ❌</p>";
+            }
+        });
+
+        function chceckstatus(){
+        let user_id = localStorage.getItem("user_id")
+        console.log("user_id", user_id)
+        if(user_id === null){
+            window.location.href = '/login';
+        }
+    }
+    chceckstatus();
+    </script>
+</body>
+</html>

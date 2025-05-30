@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Accounts</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+   <style>
+    .sidebar {
+        width: 250px;
+        height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+    }
+
+    .content {
+        margin-left: 250px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        padding-top: 50px;
+        text-align: center;
+    }
+
+    .table-container {
+        
+        margin: 50px;
+        max-height: 500px; /* Set the fixed height */
+        overflow-y: auto;  /* Enable vertical scrolling if content exceeds max height */
+        width: 80%;
+    }
+
+    /* Make the table header fixed */
+    .table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background-color: #343a40;
+        color: white;
+    }
+
+    .table th, .table td {
+        vertical-align: middle;
+    }
+
+   </style>
+</head>
+<body>
+
+<div class="d-flex">
+    <!-- Sidebar -->
+    <%- include('partials/sidebar') %>
+    <script>
+        // Ensure fetchdata() runs when the page loads
+        window.onload = fetchdata;
+      </script>
+    <!-- Main Content -->
+    <div class="content p-4">
+        <h2>User Account List</h2>
+        <div id="statusText" style="margin-top: 15px; font-size: 16px;"></div>
+        <button class="btn btn-outline-success my-2 my-sm-0" type="submit" onclick="createusers()">Create Users</button>
+        <!-- Table Container -->
+        <div class="table-container">
+            <table class="table table-striped table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>User</th> 
+                        <th>PhoneNumber</th>
+                        <th>Message</th>
+                        <th>Filename</th>
+                        <th>Send At</th> 
+                    </tr>
+                </thead>
+                <tbody id="userTableBody">
+                    <!-- Dynamic Data Will Load Here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="../socket.io/socket.io.js"></script>
+<script>
+    let users = [];
+    const socket = io();
+
+    socket.on('whatsapp-status', (data) => {
+        updateStatus(data);
+    });
+
+    socket.on('whatsapp-ready', (data) => {
+        console.log("WhatsApp Web is ready! Reloading dashboard...");
+        updateStatus(data);
+    });
+
+    function updateStatus(data) {
+        if (data.scanned) {
+            document.getElementById("statusText").innerHTML = `
+                <p><strong>Status:</strong> Scanned ✅</p>
+                <p><strong>Client Name:</strong> ${data.clientname}</p>
+                <p><strong>Client Phone:</strong> ${data.clientphone}</p>
+            `;
+        } else {
+            document.getElementById("statusText").innerHTML = "<p>Status: Not Scanned ❌</p>";
+        }
+    }
+
+    // Example function to fetch user data (replace this with an API call)
+    function loadUserData() {
+        const tbody = document.getElementById("userTableBody");
+        tbody.innerHTML = ""; // Clear existing data
+
+        users.forEach((user, index) => {
+            const row = `<tr>
+                <td>${index + 1}</td>
+                  <td>${user.logintable.username}</td>
+                <td>${user.phonenumber}</td>
+                 <td>${user.message}</td>
+                  <td>
+                    <a href="#" onclick="handleFileClick('${user.filename}')">${user.filename}</a>
+                </td>
+                <td>${user.createdAt}</td>
+               
+            </tr>`;
+            tbody.innerHTML += row;
+        });
+    }
+
+    // Call the function to load dummy data (replace with API fetch in real usage)
+   
+
+    function onload(){
+        let user_id = localStorage.getItem("user_id")
+        console.log("user_id", user_id)
+        if(user_id === null){
+            window.location.href = '/login';
+        }
+    }
+
+    function fetchdata(){
+       
+
+       const domain = 'https://whatsappserver.apbsp.com/log/fetchdetails';
+
+       fetch(domain, {
+           method: 'GET',
+           headers: {
+               'Content-Type': 'application/json'
+           },
+          
+       })
+       .then(response => {
+           if (!response.ok) {
+               throw new Error("Error in validation");
+           }
+           return response.json();
+       })
+       .then(data => {
+           console.log('Success:', data);
+           users=[];
+           users = data;
+           loadUserData();
+       })
+       .catch(error => {
+           console.error('Error:', error);
+           alert('Failed to login.');
+       });
+   }
+   fetchdata();
+    onload();
+
+    function createusers(){
+        window.location.href='/users-create'
+    }
+
+
+    function editUser(id) {
+      console.log("index", id)
+      window.location.href = '/users-edit/'+id;
+    }
+
+    function handleFileClick(filename) {
+    console.log("Clicked filename:", filename);
+    if(filename !== "Empty"){
+        console.log("Clicked filename:", filename);
+            const domain = 'http://localhost:3000/image/'+filename;
+            window.open(domain, '_blank');
+    }
+}
+
+</script>
+
+</body>
+</html>

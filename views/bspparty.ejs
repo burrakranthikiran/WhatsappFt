@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Party Office</title>
+  <!-- Bootstrap CSS -->
+  <link 
+  rel="stylesheet" 
+  href="https://stackpath.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+  integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+  crossorigin="anonymous"
+>
+<style>
+  .sidebar {
+    width: 250px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+.content {
+    margin-left: 250px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center horizontally */
+    justify-content: flex-start; /* Align content at the top */
+    padding-top: 50px; /* Add spacing from the top */
+    text-align: center;
+}
+
+
+
+.nav-link {
+    font-size: 18px;
+    padding: 10px;
+}
+
+.nav-link i {
+    margin-right: 10px;
+}
+
+.nav-link:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+}
+
+.card {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: 0.3s;
+    }
+
+    .card:hover {
+        transform: scale(1.05);
+    }
+  /* Set fixed height for table body with scrolling */
+  .table-container {
+    margin-left: 280px !important;
+    margin: 50px;
+    max-height: 500px; /* Set the fixed height */
+    overflow-y: auto;  /* Enable vertical scrolling if content exceeds max height */
+  }
+
+  /* Make the table header fixed */
+  .table thead th {
+    position: sticky;
+    top: 0; /* Keep it at the top */
+    z-index: 1; /* Ensure it stays above the body */
+    background-color: #343a40; /* Add background to header to differentiate */
+  }
+
+  /* Optional: Add a little padding to make the table look better */
+  .table th, .table td {
+    vertical-align: middle;
+  }
+
+  .container {
+  display: flex;
+  justify-content: center;
+ 
+  
+}
+
+.container2 {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+textarea {
+  margin-top: 50px;
+  width: 80%; /* Adjust the width as needed */
+  height: 200px; /* Adjust the height as needed */
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+input {
+  margin-top: 50px;
+
+  padding: 10px;
+  font-size: 16px;
+ 
+
+}
+
+.footer-buttons {
+  text-align: center;
+  margin-top: 20px;
+}
+.container-count {
+    margin-top: 25px;
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Add this line to center vertically */
+}
+</style>
+</head>
+<body>
+  <%- include('partials/sidebar') %>
+  <script>
+    // Ensure fetchdata() runs when the page loads
+    window.onload = fetchdata;
+  </script>
+
+<div class="container-count">
+  <div id="statusText" style="margin-top: 15px; font-size: 16px;"></div>
+  <br>
+  <br>
+  <b>
+    <p id="count-number" style="font-size: 25px;"></p>
+  </b>
+
+</div>
+  <!-- Navigation Bar -->
+  <!-- <nav class="navbar navbar-expand-lg  navbar-dark bg-dark">
+    
+   
+    <div class="collapse navbar-collapse" id="navbarText">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item ">
+          <a class="nav-link" href="/pan-india-screen">Pan India</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/personal-screen">Personal</a>
+        </li>
+        <li class="nav-item active">
+          <a class="nav-link" href="/bsp-party-screen"><span class="sr-only">(current)</span>BSP Party Office</a>
+        </li>
+      </ul>
+      
+       
+        <form class="form-inline">
+          
+          <button class="btn btn-outline-success my-2 my-sm-0" type="submit" onclick="sendmessages()">Send Messages</button>
+        </form>
+  
+    </div>
+  </nav> -->
+
+  <div class="container" style="margin-top: 250px;">
+
+
+    
+    <form id="createGroupForm">
+      <div class="form-group">
+        <label for="Group">Select State</label>
+        <select class="form-control" id="stateType">
+          
+          <!-- Options will be populated dynamically -->
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="Group">Select District</label>
+        <select class="form-control" id="distType">
+          <!-- Options will be populated dynamically -->
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="Group">Select Constituencies</label>
+        <select class="form-control" id="constituenciesType">
+          <!-- Options will be populated dynamically -->
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="Group">Select CMM</label>
+        <select class="form-control" id="CMMType">
+          <!-- Options will be populated dynamically -->
+        </select>
+      </div>
+
+      <!-- <div class="form-group">
+        <label for="Group">CMM Type</label>
+        <input type="text" class="form-control" id="CMMValue" readonly>
+      </div> -->
+
+      <div class="form-group">
+        <label for="Group">Select Sector</label>
+        <select class="form-control" id="SectorType">
+          <!-- Options will be populated dynamically -->
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="Group">Select VWD</label>
+        <select class="form-control" id="VWDType">
+          <!-- Options will be populated dynamically -->
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="Group">Select Booth</label>
+        <select class="form-control" id="BoothType">
+          <!-- Options will be populated dynamically -->
+        </select>
+      </div>
+      
+      <button type="button" class="btn btn-success" id="searchButton" onclick="Search()">Search</button>
+    </form>
+  </div>
+ 
+  <div class="container2">
+    <textarea placeholder="Enter your message here"></textarea>
+    
+    <input type="file" id="fileInput" accept=".png, .jpeg, .jpg" onchange="checkImageSize(this)">
+  </div>
+ 
+  
+  <div class="table-container">
+   
+    
+    <table class="table">
+      <thead class="thead-dark">
+        <tr>
+        
+          <th>ID</th>
+          <th>Group Type</th>
+          
+        </tr>
+      </thead>
+      <tbody id="groups-table-body">
+        <!-- Phone numbers will be dynamically added here -->
+      </tbody>
+    </table>
+  </div>
+ 
+  <div class="footer-buttons">
+    <!-- <button  class="btn btn-danger" onclick="previousPage()">Previous</button> -->
+    <!-- <button  class="btn btn-success" onclick="nextPage()">More</button> -->
+    <button class="btn btn-outline-success my-2 my-sm-0" type="submit" onclick="sendmessages()">Send Messages</button>
+  </div>
+
+  <!-- Bootstrap JS and dependencies -->
+  <script 
+    src="https://code.jquery.com/jquery-3.2.1.slim.min.js" 
+    integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" 
+    crossorigin="anonymous">
+  </script>
+  <script 
+    src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" 
+    integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9JoAPpSa0z9I603Ct9r47jBWg9kQtQnx6D6/J" 
+    crossorigin="anonymous">
+  </script>
+  <script 
+    src="https://stackpath.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" 
+    integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" 
+    crossorigin="anonymous">
+  </script>
+</body>
+<script>
+  let phonenumberLog;
+let count = 0;
+let StateV="", distTypeV="", constituenciesTypeV="", CMMTypeV="", SectorTypeV="", VWDTypeV="";
+let phoneNumbersArray = [];
+let statusV = false; 
+let base64data = "Empty";
+const tableContainer = document.querySelector('.table-container');
+const formgroup = document.querySelector('.container');
+const container2 = document.querySelector('.container2');
+const footerbuttons = document.querySelector('.footer-buttons');
+ 
+
+  function fetchgroups() {
+    tableContainer.style.display = 'none'; 
+    container2.style.display = 'none';
+    footerbuttons.style.display = 'none';
+    console.log("333333333333", "Working")
+      const domain = 'https://apserver.apbsp.com/state_info/state_booths_list';
+
+      fetch(domain, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to fetch groups');
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log("333333333333", data)
+        const dropdown = document.getElementById('stateType');
+        dropdown.innerHTML = ''; // Clear any existing options
+        const newOption = document.createElement('option');
+        newOption.value = 'Select Option';
+        newOption.textContent = 'Select Option';
+        dropdown.appendChild(newOption);
+     
+        // Populate dropdown with fetched data
+        data.forEach(group => {
+          const option = document.createElement('option');
+          option.value = group.stateName;
+          option.textContent = group.stateName;
+          dropdown.appendChild(option);
+        });
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to fetch groups.');
+      });
+    }
+    document.addEventListener('DOMContentLoaded', fetchgroups);
+
+
+    document.getElementById('stateType').addEventListener('click', function() {
+    
+    const stateType = document.getElementById('stateType').value;
+    console.log("Selected State:", stateType);
+    StateV = stateType;
+    // You can use the selectedValue for further processing
+    const domain = 'https://apserver.apbsp.com/state_info/dist_booths_list';
+    let rest = [
+        {stateName:stateType}
+      ]
+          fetch(domain, {
+            method: 'post',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(rest)
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Failed to fetch groups');
+            }
+            return response.json();
+          })
+          .then(data => {
+            console.log("333333333333", data)
+            const dropdown = document.getElementById('distType');
+            dropdown.innerHTML = ''; // Clear any existing options
+            const newOption = document.createElement('option');
+        newOption.value = 'Select Option';
+        newOption.textContent = 'Select Option';
+        dropdown.appendChild(newOption);
+            // Populate dropdown with fetched data
+            data.forEach(group => {
+              const option = document.createElement('option');
+              option.value = group.districtName;
+              option.textContent = group.districtName;
+              dropdown.appendChild(option);
+            });
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to fetch groups.');
+          });
+  });
+    
+  document.getElementById('distType').addEventListener('click', function() {
+    
+    const stateType = document.getElementById('stateType').value;
+    const distType = document.getElementById('distType').value;
+    StateV = stateType;
+    distTypeV = distType;
+    
+    // You can use the selectedValue for further processing
+    const domain = 'https://apserver.apbsp.com/state_info/const_booths_list';
+    let rest = [
+        {stateName:stateType,
+          districtName: distType,
+        }
+      ]
+          fetch(domain, {
+            method: 'post',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(rest)
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Failed to fetch groups');
+            }
+            return response.json();
+          })
+          .then(data => {
+            console.log("333333333333", data)
+            const dropdown = document.getElementById('constituenciesType');
+            dropdown.innerHTML = ''; // Clear any existing options
+            const newOption = document.createElement('option');
+        newOption.value = 'Select Option';
+        newOption.textContent = 'Select Option';
+        dropdown.appendChild(newOption);
+            // Populate dropdown with fetched data
+            data.forEach(group => {
+              const option = document.createElement('option');
+              option.value = group.constituenciesname;
+              option.textContent = group.constituenciesname;
+              dropdown.appendChild(option);
+            });
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to fetch groups.');
+          });
+  });
+  document.getElementById('constituenciesType').addEventListener('click', function() {
+    
+    const stateType = document.getElementById('stateType').value;
+    const distType = document.getElementById('distType').value;
+    const constituenciesType = document.getElementById('constituenciesType').value;
+    StateV = stateType;
+    distTypeV = distType;
+    constituenciesTypeV = constituenciesType;
+    // You can use the selectedValue for further processing
+    const domain = 'https://apserver.apbsp.com/state_info/cmm_booths_list';
+    let rest = [
+        {stateName:stateType,
+          districtName: distType,
+          constituenciesname: constituenciesType,
+        }
+      ]
+          fetch(domain, {
+            method: 'post',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(rest)
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Failed to fetch groups');
+            }
+            return response.json();
+          })
+          .then(data => {
+            console.log("333333333333", data)
+            const dropdown = document.getElementById('CMMType');
+            dropdown.innerHTML = ''; // Clear any existing options
+            const newOption = document.createElement('option');
+        newOption.value = 'Select Option';
+        newOption.textContent = 'Select Option';
+        dropdown.appendChild(newOption);
+            // Populate dropdown with fetched data
+            data.forEach(group => {
+              const option = document.createElement('option');
+              option.value = group.mandalsname;
+              option.textContent = group.mandalsname;
+              dropdown.appendChild(option);
+            });
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to fetch groups.');
+          });
+  });
+
+  document.getElementById('CMMType').addEventListener('click', function() {
+    
+    const stateType = document.getElementById('stateType').value;
+    const distType = document.getElementById('distType').value;
+    const constituenciesType = document.getElementById('constituenciesType').value;
+    const CMMType = document.getElementById('CMMType').value;
+    StateV = stateType;
+    distTypeV = distType;
+    constituenciesTypeV = constituenciesType;
+    CMMTypeV = CMMType;
+    // You can use the selectedValue for further processing
+    const domain = 'https://apserver.apbsp.com/state_info/sector_booths_list';
+    let rest = [
+        {stateName:stateType,
+          districtName: distType,
+          constituenciesname: constituenciesType,
+          mandalsname: CMMType,
+        }
+      ]
+          fetch(domain, {
+            method: 'post',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(rest)
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Failed to fetch groups');
+            }
+            return response.json();
+          })
+          .then(data => {
+            console.log("333333333333", data)
+            const dropdown = document.getElementById('SectorType');
+            dropdown.innerHTML = ''; // Clear any existing options
+            const newOption = document.createElement('option');
+        newOption.value = 'Select Option';
+        newOption.textContent = 'Select Option';
+        dropdown.appendChild(newOption);
+            // Populate dropdown with fetched data
+            data.forEach(group => {
+              const option = document.createElement('option');
+              option.value = group.sectorname;
+              option.textContent = group.sectorname;
+              dropdown.appendChild(option);
+            });
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to fetch groups.');
+          });
+  });
+
+  document.getElementById('SectorType').addEventListener('click', function() {
+    
+    const stateType = document.getElementById('stateType').value;
+    const distType = document.getElementById('distType').value;
+    const constituenciesType = document.getElementById('constituenciesType').value;
+    const CMMType = document.getElementById('CMMType').value;
+    const SectorType = document.getElementById('SectorType').value;
+    StateV = stateType;
+    distTypeV = distType;
+    constituenciesTypeV = constituenciesType;
+    CMMTypeV = CMMType;
+    SectorTypeV = SectorType;
+    // You can use the selectedValue for further processing
+    const domain = 'https://apserver.apbsp.com/state_info/village_booths_list';
+    let rest = [
+        {stateName:stateType,
+          districtName: distType,
+          constituenciesname: constituenciesType,
+          mandalsname: CMMType,
+          sectorname: SectorType,
+        }
+      ]
+          fetch(domain, {
+            method: 'post',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(rest)
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Failed to fetch groups');
+            }
+            return response.json();
+          })
+          .then(data => {
+            // console.log("333333333333", )
+            // document.getElementById('CMMValue').value = data[0].constituenciestype
+            
+            const dropdown = document.getElementById('VWDType');
+            dropdown.innerHTML = ''; // Clear any existing options
+            const newOption = document.createElement('option');
+        newOption.value = 'Select Option';
+        newOption.textContent = 'Select Option';
+        dropdown.appendChild(newOption);
+            // Populate dropdown with fetched data
+            data.forEach(group => {
+              const option = document.createElement('option');
+              option.value = group.villagename;
+              option.textContent = group.villagename;
+              dropdown.appendChild(option);
+            });
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to fetch groups.');
+          });
+  });
+  document.getElementById('VWDType').addEventListener('click', function() {
+    
+    const stateType = document.getElementById('stateType').value;
+    const distType = document.getElementById('distType').value;
+    const constituenciesType = document.getElementById('constituenciesType').value;
+    const CMMType = document.getElementById('CMMType').value;
+    const SectorType = document.getElementById('SectorType').value;
+    const VWDType = document.getElementById('VWDType').value;
+    console.log("VWDType", VWDType);
+    StateV = stateType;
+    distTypeV = distType;
+    constituenciesTypeV = constituenciesType;
+    CMMTypeV = CMMType;
+    SectorTypeV = SectorType;
+    VWDTypeV = VWDType;
+
+  
+    // You can use the selectedValue for further processing
+    const domain = 'https://apserver.apbsp.com/state_info/booth_booths_list';
+    let rest = [
+        {stateName:stateType,
+          districtName: distType,
+          constituenciesname: constituenciesType,
+          mandalsname: CMMType,
+          sectorname: SectorType,
+          villagename: VWDType,
+        }
+      ]
+          fetch(domain, {
+            method: 'post',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(rest)
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Failed to fetch groups');
+            }
+            return response.json();
+          })
+          .then(data => {
+            console.log("333333333333", data)
+            const dropdown = document.getElementById('BoothType');
+            dropdown.innerHTML = ''; // Clear any existing options
+            const newOption = document.createElement('option');
+        newOption.value = 'Select Option';
+        newOption.textContent = 'Select Option';
+        dropdown.appendChild(newOption);
+            // Populate dropdown with fetched data
+            data.forEach(group => {
+              const option = document.createElement('option');
+              option.value = group.boothsname;
+              option.textContent = group.boothsname;
+              dropdown.appendChild(option);
+            });
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to fetch groups.');
+          });
+  });
+
+  // document.getElementById('searchButton').addEventListener('click', function() {
+    
+  // });
+
+
+  function sendmessages() {
+    Log();
+    const textarea = document.querySelector('textarea');
+     console.log(phoneNumbersArray)
+     count += phoneNumbersArray.length;
+     document.getElementById("count-number").textContent = "Message Delivery Count: " + count;
+    // Get the input text from the textarea
+    const inputText = textarea.value;
+
+    const jsonData = {
+        message: inputText,
+        imagebase64: base64data,
+        phoneNumbersArray: phoneNumbersArray,
+    };
+    // Make an AJAX request to the server to get the scan status using the GET method
+    fetch('/pan-india-send-message', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(jsonData)
+    })
+
+    .then(response => {
+      console.log("3333333333333", response);
+        if (response.status === 200) {
+          nextPage();
+          // alert("WhatsApp client is not ready. Please log in first.");
+        }
+        return response.json();
+    })
+  
+    .catch(error => {
+        console.error('Error checking scan status', error);
+    });
+
+    // Prevent the default form submission behavior
+    event.preventDefault();
+  }
+
+  function checkImageSize(input) {
+    const file = input.files[0]; // Get the selected file
+    const formData = new FormData();
+    formData.append('image', file);
+
+    // Make an AJAX request to upload the image
+    fetch('/upload-image', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to upload image');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Image uploaded successfully:', data);
+        base64data = data.filename;
+    })
+    .catch(error => {
+        console.error('Error uploading image:', error);
+    });
+}
+
+function nextPage() {
+        console.log(count);
+        count += 1000;
+        console.log(count);
+        Search();
+        statusV = true;
+
+  }
+
+  function Search() {
+        
+    const stateType = StateV;
+    const distType = distTypeV;
+    const constituenciesType = constituenciesTypeV;
+    const CMMType = CMMTypeV;
+    const SectorType = SectorTypeV;
+    const VWDType = VWDTypeV;
+    const BoothType = document.getElementById('BoothType').value;
+    console.log("3333333333333", count)
+  
+    // You can use the selectedValue for further processing
+    const domain = 'https://apserver.apbsp.com/voter/search_api_dt_phonenumber';
+    let rest = [
+        {stateName:stateType,
+          districtName: distType,
+          constituenciesname: constituenciesType,
+          mandalsname: CMMType,
+          sectorname: SectorType,
+          villagename: VWDType,
+          boothsname: BoothType,
+          offset: count,
+        }
+      ]
+      console.log("rest", rest);
+          fetch(domain, {
+            method: 'post',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(rest)
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Failed to fetch groups');
+            }
+            return response.json();
+          })
+          .then(data => {
+            
+
+            console.log("333333333333", data);
+            data = data.filter(voter => voter.phonenumber !== null);
+            if(data.length != 0){
+              phoneNumbersArray = [];
+              tableContainer.style.display = 'block'; 
+              formgroup.style.display = 'none'; 
+              container2.style.display='block';
+              footerbuttons.style.display = 'block';
+
+              const tableBody = document.getElementById('groups-table-body');
+              tableBody.innerHTML = ''; // Clear the table before populating
+
+              data.forEach(group => {
+                phoneNumbersArray.push(group.phonenumber);
+                const row = document.createElement('tr');
+                
+                // Create table cells
+                const idCell = document.createElement('td');
+                idCell.textContent = group.id;
+
+                const grouptypeCell = document.createElement('td');
+                grouptypeCell.textContent = group.phonenumber;
+
+                
+
+                
+
+                // Append cells to the row
+                row.appendChild(idCell);
+                row.appendChild(grouptypeCell);
+               
+            
+
+                // Append row to the table body
+                tableBody.appendChild(row);
+                if(statusV){
+                  sendmessages();
+                }
+              });
+            }else{
+              alert('No Record Found');
+            }
+          
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to fetch groups.');
+          });
+
+  }
+
+  function Log() {
+   
+   const textarea = document.querySelector('textarea');
+   // Get the input text from the textarea
+   const inputText = textarea.value;
+
+   const jsonData = {
+       message: inputText,
+       filename: base64data,
+       logintableId: localStorage.getItem("user_id"),
+       phonenumber: phonenumberLog,
+   };
+   const domain = 'https://whatsappserver.apbsp.com/log/create';
+   // Make an AJAX request to the server to get the scan status using the GET method
+   fetch(domain, {
+       method: 'POST',
+       headers: {
+           'Content-Type': 'application/json'
+       },
+       body: JSON.stringify(jsonData)
+   })
+
+   .then(response => {
+        console.log("response", response);
+       return response.json();
+   })
+ 
+   .catch(error => {
+       console.error('Error checking scan status', error);
+   });
+
+   // Prevent the default form submission behavior
+   event.preventDefault();
+ }
+  
+</script>
+<script src="../socket.io/socket.io.js"></script>
+    <script>
+
+        const socket = io();
+        socket.on('whatsapp-status', (data) => {
+            if (data.scanned) {
+              phonenumberLog = data.clientphone;
+                document.getElementById("statusText").innerHTML = `
+                    <p><strong>Status:</strong> Scanned ✅</p>
+                    <p><strong>Client Name:</strong> ${data.clientname}</p>
+                    <p><strong>Client Phone:</strong> ${data.clientphone}</p>
+                `;
+            } else {
+                document.getElementById("statusText").innerHTML = "<p>Status: Not Scanned ❌</p>";
+            }
+        });
+        socket.on('whatsapp-ready', (data) => {
+            console.log("WhatsApp Web is ready! Reloading dashboard...");
+            console.log("data", data)
+            if (data.scanned) {
+                document.getElementById("statusText").innerHTML = `
+                    <p><strong>Status:</strong> Scanned ✅</p>
+                    <p><strong>Client Name:</strong> ${data.clientname}</p>
+                    <p><strong>Client Phone:</strong> ${data.clientphone}</p>
+                `;
+            } else {
+                document.getElementById("statusText").innerHTML = "<p>Status: Not Scanned ❌</p>";
+            }
+        });
+
+        function chceckstatus(){
+        let user_id = localStorage.getItem("user_id")
+        console.log("user_id", user_id)
+        if(user_id === null){
+            window.location.href = '/login';
+        }
+    }
+    chceckstatus();
+    </script>
+
+</html>

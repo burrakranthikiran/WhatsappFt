@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Detail</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+   <style>
+    .sidebar {
+        width: 250px;
+        height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+    }
+
+    .content {
+        margin-left: 250px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        padding-top: 50px;
+        text-align: center;
+    }
+
+    .form-container {
+    width: 50%;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #f8f9fa;
+    position: absolute;
+    top: 180px; /* Positions the form at the bottom */
+    right: 400px; /* Aligns it to the right */
+}
+
+   </style>
+</head>
+<body>
+
+<div class="d-flex">
+    <!-- Sidebar -->
+    <%- include('partials/sidebar') %>
+    <script>
+        // Ensure fetchdata() runs when the page loads
+        window.onload = fetchdata;
+      </script>
+    <!-- Main Content -->
+    <div class="content p-4">
+        <h2>User Detail</h2>
+
+        <div id="statusText" style="margin-top: 15px; font-size: 16px;"></div>
+
+        
+    </div>
+    
+    <div class="form-container">
+        <form id="userForm">
+            <div class="mb-3">
+                <label for="id" class="form-label">ID</label>
+                <input type="text" class="form-control" id="id" name="id" value="<%= userId %>" readonly>
+            </div>
+            <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="username" name="username" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="status" class="form-label">Status</label>
+                <select class="form-control" id="status" name="status">
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Permissions</label><br>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="permissions" value="pan-india" id="pan-india">
+                    <label class="form-check-label" for="pan-india">Pan-India</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="permissions" value="personal" id="personal">
+                    <label class="form-check-label" for="personal">Personal</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="permissions" value="bsp" id="bsp">
+                    <label class="form-check-label" for="bsp">BSP</label>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Update User</button>
+        </form>
+    </div>
+</div>
+
+<script src="../socket.io/socket.io.js"></script>
+<script>
+    const socket = io();
+
+    socket.on('whatsapp-status', (data) => {
+        updateStatus(data);
+    });
+
+    socket.on('whatsapp-ready', (data) => {
+        console.log("WhatsApp Web is ready! Reloading dashboard...");
+        updateStatus(data);
+    });
+
+    function updateStatus(data) {
+        if (data.scanned) {
+            document.getElementById("statusText").innerHTML = `
+                <p><strong>Status:</strong> Scanned ✅</p>
+                <p><strong>Client Name:</strong> ${data.clientname}</p>
+                <p><strong>Client Phone:</strong> ${data.clientphone}</p>
+            `;
+        } else {
+            document.getElementById("statusText").innerHTML = "<p>Status: Not Scanned ❌</p>";
+        }
+    }
+
+    function onload(){
+        let user_id = localStorage.getItem("user_id")
+        console.log("user_id", user_id)
+        if(user_id === null){
+            window.location.href = '/login';
+        }
+    }
+
+    document.getElementById("userForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+        const id = document.getElementById("id").value;
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+        const status = document.getElementById("status").value;
+        const loginaccesstable = Array.from(document.querySelectorAll('input[name="permissions"]:checked')).map(checkbox => checkbox.value);
+
+        const userData = { id, username, password, status, loginaccesstable };
+        console.log("User Data:", userData);
+        const domain = 'https://whatsappserver.apbsp.com/login/update';
+
+        fetch(domain, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(userData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            window.location.href='/useraccounts';
+        })
+        .catch(error => alert("Error creating user."));
+    });
+
+    onload();
+
+    function fetchdata(){
+        
+        const id = document.getElementById("id").value;
+       const domain = 'https://whatsappserver.apbsp.com/login/viewbyid';
+
+      
+       fetch(domain, {
+           method: 'POST',
+           headers: {
+               'Content-Type': 'application/json'
+           },
+           body: JSON.stringify({
+            id:id
+           })
+       })
+       .then(response => {
+           if (!response.ok) {
+               throw new Error("Error in validation");
+           }
+           return response.json();
+       })
+       .then(data => {
+        console.log('Fetched User Data:', data);
+        
+        // Populate form fields with fetched data
+        document.getElementById("username").value = data.username;
+        document.getElementById("password").value = data.password;
+        document.getElementById("status").value = data.status;
+
+        // Uncheck all permission checkboxes first
+        document.querySelectorAll('input[name="permissions"]').forEach(checkbox => {
+            checkbox.checked = false;
+        });
+
+        // Check the checkboxes that match the fetched permissions
+        data.loginaccesstables.forEach(permission => {
+            const checkbox = document.querySelector(`input[name="permissions"][value="${permission.module}"]`);
+            if (checkbox) {
+                checkbox.checked = true;
+            }
+        });
+    })
+       .catch(error => {
+           console.error('Error:', error);
+           alert('Failed to login.');
+       });
+   }
+   fetchdata();
+</script>
+
+</body>
+</html>
