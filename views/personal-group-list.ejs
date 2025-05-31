@@ -207,7 +207,7 @@
 
   <script>
     function fetchgroups() {
-      const domain = 'http://wtserver.scpl.it.com/group/fetchdetails';
+      const domain = 'https://wtserver.scpl.it.com/group/fetchdetails';
       const jsonData = {
           logintableId: localStorage.getItem("user_id"),
       };
@@ -302,7 +302,7 @@
       const jsonData = [{
         id: group.id,
       }];
-                  const domain = 'http://wtserver.scpl.it.com/group/delete';
+                  const domain = 'https://wtserver.scpl.it.com/group/delete';
 
             fetch(domain, {
                 method: 'POST',

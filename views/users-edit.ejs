@@ -146,7 +146,7 @@
 
         const userData = { id, username, password, status, loginaccesstable };
         console.log("User Data:", userData);
-        const domain = 'http://wtserver.scpl.it.com/login/update';
+        const domain = 'https://wtserver.scpl.it.com/login/update';
 
         fetch(domain, {
             method: "POST",
@@ -165,7 +165,7 @@
     function fetchdata(){
         
         const id = document.getElementById("id").value;
-       const domain = 'http://wtserver.scpl.it.com/login/viewbyid';
+       const domain = 'https://wtserver.scpl.it.com/login/viewbyid';
 
       
        fetch(domain, {
