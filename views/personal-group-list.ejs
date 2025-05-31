@@ -207,7 +207,7 @@
 
   <script>
     function fetchgroups() {
-      const domain = 'https://whatsappserver.apbsp.com/group/fetchdetails';
+      const domain = 'http://wtserver.scpl.it.com/group/fetchdetails';
       const jsonData = {
           logintableId: localStorage.getItem("user_id"),
       };
@@ -302,7 +302,7 @@
       const jsonData = [{
         id: group.id,
       }];
-                  const domain = 'https://whatsappserver.apbsp.com/group/delete';
+                  const domain = 'http://wtserver.scpl.it.com/group/delete';
 
             fetch(domain, {
                 method: 'POST',

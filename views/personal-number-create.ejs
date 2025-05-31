@@ -195,7 +195,7 @@
   </script>
   <script>
     function fetchgroups() {
-      const domain = 'https://whatsappserver.apbsp.com/group/fetchdetails';
+      const domain = 'http://wtserver.scpl.it.com/group/fetchdetails';
       const jsonData = {
           logintableId: localStorage.getItem("user_id"),
       };
@@ -259,7 +259,7 @@
         phonenumber: phonenumber,
         logintableId: localStorage.getItem("user_id"),
       }];
-                  const domain = 'https://whatsappserver.apbsp.com/phonenumber/create';
+                  const domain = 'http://wtserver.scpl.it.com/phonenumber/create';
 
             fetch(domain, {
                 method: 'POST',

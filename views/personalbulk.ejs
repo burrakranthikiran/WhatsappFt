@@ -192,7 +192,7 @@
 
  
     function fetchgroups() {
-      const domain = 'https://whatsappserver.apbsp.com/group/fetchdetails';
+      const domain = 'http://wtserver.scpl.it.com/group/fetchdetails';
       const jsonData = {
           logintableId: localStorage.getItem("user_id"),
       };
@@ -250,7 +250,7 @@
         phonenumber: phonenumber,
         logintableId: localStorage.getItem("user_id"),
       }];
-                  const domain = 'https://whatsappserver.apbsp.com/phonenumber/create';
+                  const domain = 'http://wtserver.scpl.it.com/phonenumber/create';
 
             fetch(domain, {
                 method: 'POST',
@@ -386,7 +386,7 @@ for (let i = 0; i < totalBatches; i++) {
             document.getElementById("status").innerText = `Sending Batch ${i + 1}/${totalBatches} - Records: ${batch.length}`;
         }
 
-        const response = await fetch("https://whatsappserver.apbsp.com/phonenumber/bulkinsert", {
+        const response = await fetch("http://wtserver.scpl.it.com/phonenumber/bulkinsert", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(batch), // Send the batch as an array

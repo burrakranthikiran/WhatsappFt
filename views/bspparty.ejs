@@ -295,7 +295,7 @@ const footerbuttons = document.querySelector('.footer-buttons');
     container2.style.display = 'none';
     footerbuttons.style.display = 'none';
     console.log("333333333333", "Working")
-      const domain = 'https://apserver.apbsp.com/state_info/state_booths_list';
+      const domain = 'https://aibspserver.scpl.it.com/state_info/state_booths_list';
 
       fetch(domain, {
         method: 'GET',
@@ -340,7 +340,7 @@ const footerbuttons = document.querySelector('.footer-buttons');
     console.log("Selected State:", stateType);
     StateV = stateType;
     // You can use the selectedValue for further processing
-    const domain = 'https://apserver.apbsp.com/state_info/dist_booths_list';
+    const domain = 'https://aibspserver.scpl.it.com/state_info/dist_booths_list';
     let rest = [
         {stateName:stateType}
       ]
@@ -387,7 +387,7 @@ const footerbuttons = document.querySelector('.footer-buttons');
     distTypeV = distType;
     
     // You can use the selectedValue for further processing
-    const domain = 'https://apserver.apbsp.com/state_info/const_booths_list';
+    const domain = 'https://aibspserver.scpl.it.com/state_info/const_booths_list';
     let rest = [
         {stateName:stateType,
           districtName: distType,
@@ -436,7 +436,7 @@ const footerbuttons = document.querySelector('.footer-buttons');
     distTypeV = distType;
     constituenciesTypeV = constituenciesType;
     // You can use the selectedValue for further processing
-    const domain = 'https://apserver.apbsp.com/state_info/cmm_booths_list';
+    const domain = 'https://aibspserver.scpl.it.com/state_info/cmm_booths_list';
     let rest = [
         {stateName:stateType,
           districtName: distType,
@@ -489,7 +489,7 @@ const footerbuttons = document.querySelector('.footer-buttons');
     constituenciesTypeV = constituenciesType;
     CMMTypeV = CMMType;
     // You can use the selectedValue for further processing
-    const domain = 'https://apserver.apbsp.com/state_info/sector_booths_list';
+    const domain = 'https://aibspserver.scpl.it.com/state_info/sector_booths_list';
     let rest = [
         {stateName:stateType,
           districtName: distType,
@@ -545,7 +545,7 @@ const footerbuttons = document.querySelector('.footer-buttons');
     CMMTypeV = CMMType;
     SectorTypeV = SectorType;
     // You can use the selectedValue for further processing
-    const domain = 'https://apserver.apbsp.com/state_info/village_booths_list';
+    const domain = 'https://aibspserver.scpl.it.com/state_info/village_booths_list';
     let rest = [
         {stateName:stateType,
           districtName: distType,
@@ -608,7 +608,7 @@ const footerbuttons = document.querySelector('.footer-buttons');
 
   
     // You can use the selectedValue for further processing
-    const domain = 'https://apserver.apbsp.com/state_info/booth_booths_list';
+    const domain = 'https://aibspserver.scpl.it.com/state_info/booth_booths_list';
     let rest = [
         {stateName:stateType,
           districtName: distType,
@@ -744,7 +744,7 @@ function nextPage() {
     console.log("3333333333333", count)
   
     // You can use the selectedValue for further processing
-    const domain = 'https://apserver.apbsp.com/voter/search_api_dt_phonenumber';
+    const domain = 'https://aibspserver.scpl.it.com/voter/search_api_dt_phonenumber';
     let rest = [
         {stateName:stateType,
           districtName: distType,
@@ -836,7 +836,7 @@ function nextPage() {
        logintableId: localStorage.getItem("user_id"),
        phonenumber: phonenumberLog,
    };
-   const domain = 'https://whatsappserver.apbsp.com/log/create';
+   const domain = 'http://wtserver.scpl.it.com/log/create';
    // Make an AJAX request to the server to get the scan status using the GET method
    fetch(domain, {
        method: 'POST',

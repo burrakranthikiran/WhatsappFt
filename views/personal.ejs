@@ -287,7 +287,7 @@ input {
    function fetchgroupFilter() {
     count = 0;
     // const domain = 'http://localhost:5101/phonenumber/fetchdetailsfilter';
-    const domain = 'https://whatsappserver.apbsp.com/phonenumber/fetchdetailsfilter';
+    const domain = 'http://wtserver.scpl.it.com/phonenumber/fetchdetailsfilter';
     const selectedGroup = document.getElementById('grouptype').value;
 
     let jsonData = {
@@ -321,7 +321,7 @@ input {
   }
   function fetchgroups() {
     // const domain = 'http://localhost:5101/phonenumber/fetchdetails';
-    const domain = 'https://whatsappserver.apbsp.com/phonenumber/fetchdetails';
+    const domain = 'http://wtserver.scpl.it.com/phonenumber/fetchdetails';
     const jsonData = {
           logintableId: localStorage.getItem("user_id"),
            count : count
@@ -426,7 +426,7 @@ function deleteGroup(group) {
     const jsonData = [{
       id: group.id,
     }];
-                const domain = 'https://whatsappserver.apbsp.com/phonenumber/delete';
+                const domain = 'http://wtserver.scpl.it.com/phonenumber/delete';
 
           fetch(domain, {
               method: 'POST',
@@ -455,7 +455,7 @@ function deleteGroup(group) {
 }
 
 function fetchgroupsList() {
-      const domain = 'https://whatsappserver.apbsp.com/group/fetchdetails';
+      const domain = 'http://wtserver.scpl.it.com/group/fetchdetails';
       const jsonData = {
           logintableId: localStorage.getItem("user_id"),
       };
@@ -566,7 +566,7 @@ async function sendmessages() {
 
   async function fetchgroupFilterSend() {
     // const domain = 'http://localhost:5101/phonenumber/fetchdetailsfilter';
-    const domain = 'https://whatsappserver.apbsp.com/phonenumber/fetchdetailsfilter';
+    const domain = 'http://wtserver.scpl.it.com/phonenumber/fetchdetailsfilter';
     const selectedGroup = document.getElementById('grouptype').value;
 
     let jsonData = {
@@ -609,7 +609,7 @@ async function sendmessages() {
 
   async function fetchgroupFilterCount() {
     // const domain = 'http://localhost:5101/phonenumber/fetchdetailsfiltercount';
-    const domain = 'https://whatsappserver.apbsp.com/phonenumber/fetchdetailsfiltercount';
+    const domain = 'http://wtserver.scpl.it.com/phonenumber/fetchdetailsfiltercount';
     const selectedGroup = document.getElementById('grouptype').value;
 
     let jsonData = {
@@ -664,7 +664,7 @@ async function sendmessages() {
         logintableId: localStorage.getItem("user_id"),
         phonenumber: phonenumberLog,
     };
-    const domain = 'https://whatsappserver.apbsp.com/log/create';
+    const domain = 'http://wtserver.scpl.it.com/log/create';
     // Make an AJAX request to the server to get the scan status using the GET method
     fetch(domain, {
         method: 'POST',
