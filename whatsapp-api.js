@@ -256,36 +256,68 @@ app.post('/send-message', async (req, res) => {
 });
 
 
+// app.post('/pan-india-send-message', async (req, res) => {
+//             const message = req.body.message;
+//             const fileName = req.body.imagebase64;
+//             const phoneNumbersArray = req.body.phoneNumbersArray;
+//     try {
+//             // for(let phonenumber of phoneNumbersArray){
+//             //     let phnumber = "91"+phonenumber;
+//             //     //    console.log("phnumber",phnumber);
+//             //     }
+//         if (!isAuthenticated) {
+//             return res.status(400).send({ error: 'WhatsApp client is not ready. Please log in first.' });
+//         }
+//         if(fileName === "Empty"){
+//             for(let phonenumber of phoneNumbersArray){
+//                 console.log("phonenumber", "91"+phonenumber);
+//                 let phnumber = "91"+phonenumber;
+//             await client.sendMessage(`${phnumber}@c.us`, message);
+//             }
+
+//         }else{
+//             const base64Data = getFileAsBase64(fileName);
+//             for(let phonenumber of phoneNumbersArray){
+//                 let phnumber = "91"+phonenumber;
+//                     const media = new MessageMedia('image/png', base64Data);
+//                     await client.sendMessage(`${phnumber}@c.us`, media);
+//                     await client.sendMessage(`${phnumber}@c.us`, message);
+//                 }
+            
+//         }
+//         res.status(200).send({ success: true }); 
+//     } catch (error) {
+//         res.status(500).send({ success: false, error: error.message });
+//     }
+// });
+
 app.post('/pan-india-send-message', async (req, res) => {
-            const message = req.body.message;
-            const fileName = req.body.imagebase64;
-            const phoneNumbersArray = req.body.phoneNumbersArray;
+    const message = req.body.message;
+    const fileName = req.body.imagebase64;
+    const phoneNumbersArray = req.body.phoneNumbersArray;
+
     try {
-            // for(let phonenumber of phoneNumbersArray){
-            //     let phnumber = "91"+phonenumber;
-            //     //    console.log("phnumber",phnumber);
-            //     }
         if (!isAuthenticated) {
             return res.status(400).send({ error: 'WhatsApp client is not ready. Please log in first.' });
         }
-        if(fileName === "Empty"){
-            for(let phonenumber of phoneNumbersArray){
-                console.log("phonenumber", "91"+phonenumber);
-                let phnumber = "91"+phonenumber;
-            await client.sendMessage(`${phnumber}@c.us`, message);
-            }
 
-        }else{
-            const base64Data = getFileAsBase64(fileName);
-            for(let phonenumber of phoneNumbersArray){
-                let phnumber = "91"+phonenumber;
-                    const media = new MessageMedia('image/png', base64Data);
-                    await client.sendMessage(`${phnumber}@c.us`, media);
-                    await client.sendMessage(`${phnumber}@c.us`, message);
-                }
-            
-        }
-        res.status(200).send({ success: true }); 
+        const tasks = phoneNumbersArray.map(async (phonenumber) => {
+            const phnumber = "91" + phonenumber;
+
+            if (fileName === "Empty") {
+                await client.sendMessage(`${phnumber}@c.us`, message);
+            } else {
+                const base64Data = getFileAsBase64(fileName);
+                const media = new MessageMedia('image/png', base64Data);
+                await client.sendMessage(`${phnumber}@c.us`, media);
+                await client.sendMessage(`${phnumber}@c.us`, message);
+            }
+        });
+
+        // Run all message tasks in parallel
+        await Promise.all(tasks);
+
+        res.status(200).send({ success: true });
     } catch (error) {
         res.status(500).send({ success: false, error: error.message });
     }
