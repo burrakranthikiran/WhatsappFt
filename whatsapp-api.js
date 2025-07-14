@@ -1,5 +1,5 @@
 const express = require('express');
-const { Client, MessageMedia  } = require('whatsapp-web.js');
+const wppconnect = require('@wppconnect-team/wppconnect');
 const qrcode = require('qrcode');
 const compression = require('compression');
 const timeout = require('connect-timeout');
@@ -22,7 +22,7 @@ app.set('views', './views'); // Ensure you have a 'views' folder for EJS files
 app.use(express.static('public')); // Serve static files from 'public' folder
 app.use(express.json({ limit: '10mb' })); 
 
-let client; // WhatsApp client
+let client = null;
 let isClientReady = false; // To track if WhatsApp client is ready
 let qrCodeDataUrl = null; // To store the QR code
 let isAuthenticated = false; // To track if the user is authenticated
@@ -43,68 +43,119 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 // Route: Login Page
+// app.get('/dashboard', async (req, res) => {
+//     isClientReady = false;
+//     isAuthenticated = false;
+//     qrCodeDataUrl = null;
+//     let data = {
+//         scanned: false,
+//     }
+//     io.emit('whatsapp-status',data); 
+
+//     if (client && qrCodeDataUrl) {
+//         // Render the EJS template with the QR code data
+//         return res.render('dashboard', { qrCodeDataUrl });
+//     }
+
+//     client = new Client();
+
+//     // This flag prevents multiple responses
+//     let responseSent = false;
+
+//     client.on('qr', (qr) => {
+//         if (responseSent) return; // Prevent multiple responses
+//         qrcode.toDataURL(qr, (err, url) => {
+//             if (err) {
+//                 if (!responseSent) {
+//                     responseSent = true;
+//                     return res.status(500).send({ error: 'Failed to generate QR code' });
+//                 }
+//             }
+//             qrCodeDataUrl = url; // Cache the QR code
+//             if (!responseSent) {
+//                 responseSent = true;
+//                 res.render('dashboard', { qrCodeDataUrl });
+//             }
+//         });
+//     });
+
+//     client.on('ready', () => {
+//         isClientReady = true;
+//         isAuthenticated = true; // Mark user as authenticated
+//         console.log('WhatsApp Web is ready!');  
+        
+//         if (isAuthenticated) {
+//             let data = {
+//                 scanned: true,
+//                 clientname : client.info.pushname,
+//                clientphone : client.info.wid.user,
+//             }
+//             io.emit('whatsapp-ready',data); 
+//             } else {
+//                 let data = {
+//                     scanned: false,
+//                 }
+//                 io.emit('whatsapp-ready',data); 
+//             }
+  
+//     });
+
+//     client.on('authenticated', () => {
+//         console.log('Authenticated with WhatsApp');
+//     });
+
+//     client.initialize();
+// });
 app.get('/dashboard', async (req, res) => {
     isClientReady = false;
     isAuthenticated = false;
     qrCodeDataUrl = null;
-    let data = {
-        scanned: false,
-    }
-    io.emit('whatsapp-status',data); 
 
-    if (client && qrCodeDataUrl) {
-        // Render the EJS template with the QR code data
-        return res.render('dashboard', { qrCodeDataUrl });
-    }
+    io.emit('whatsapp-status', { scanned: false });
 
-    client = new Client();
+    wppconnect.create({
+        session: 'broadcast-session',
+        catchQR: (base64Qr, asciiQR, attempts, urlCode) => {
+            // Convert base64 string to data URL
+            console.log("base64Qr", base64Qr);
+            console.log("base64Qr", asciiQR);
+            console.log("base64Qr", attempts);
+            console.log("base64Qr", urlCode);
+            qrCodeDataUrl = base64Qr;
+            console.log('QR URL generated for UI.');
 
-    // This flag prevents multiple responses
-    let responseSent = false;
+            // Emit to WebSocket if needed
+            io.emit('qr-code', qrCodeDataUrl);
 
-    client.on('qr', (qr) => {
-        if (responseSent) return; // Prevent multiple responses
-        qrcode.toDataURL(qr, (err, url) => {
-            if (err) {
-                if (!responseSent) {
-                    responseSent = true;
-                    return res.status(500).send({ error: 'Failed to generate QR code' });
-                }
-            }
-            qrCodeDataUrl = url; // Cache the QR code
-            if (!responseSent) {
-                responseSent = true;
+            // Render EJS page with QR code (only first time)
+            if (!isClientReady && !isAuthenticated) {
                 res.render('dashboard', { qrCodeDataUrl });
             }
-        });
-    });
-
-    client.on('ready', () => {
+        },
+        headless: true,
+        useChrome: true,
+        puppeteerOptions: {
+            args: ['--no-sandbox']
+        }
+    }).then((_client) => {
+        client = _client;
         isClientReady = true;
-        isAuthenticated = true; // Mark user as authenticated
-        console.log('WhatsApp Web is ready!');  
-        
-        if (isAuthenticated) {
-            let data = {
+        isAuthenticated = true;
+
+        client.getHostDevice().then((info) => {
+            
+            console.log("info", info);
+            io.emit('whatsapp-ready', {
                 scanned: true,
-                clientname : client.info.pushname,
-               clientphone : client.info.wid.user,
-            }
-            io.emit('whatsapp-ready',data); 
-            } else {
-                let data = {
-                    scanned: false,
-                }
-                io.emit('whatsapp-ready',data); 
-            }
-  
+                
+                // clientname: info.pushname,
+                // clientphone: info.wid.user,
+            });
+        });
+    }).catch((err) => {
+        console.error('WPP connection error:', err);
+        res.status(500).send('Failed to connect to WhatsApp');
     });
-
-    client.on('authenticated', () => {
-        console.log('Authenticated with WhatsApp');
-    });
-
-    client.initialize();
 });
 
 
@@ -222,8 +273,8 @@ app.get('/check-scan-status', async (req, res) => {
     if (isAuthenticated) {
     let data = {
         scanned: true,
-        clientname : client.info.pushname,
-       clientphone : client.info.wid.user,
+    //     clientname : client.info.pushname,
+    //    clientphone : client.info.wid.user,
     }
         res.status(200).json(data);
     } else {
@@ -235,23 +286,41 @@ app.get('/check-scan-status', async (req, res) => {
 });
 
 // API: Send a Message
+// app.post('/send-message', async (req, res) => {
+//     if (!isAuthenticated) {
+//         return res.status(400).send({ error: 'WhatsApp client is not ready. Please log in first.' });
+//     }
+
+//     const { phoneNumber, message } = req.body;
+
+//     if (!phoneNumber || !message) {
+//         return res.status(400).send({ error: 'Phone number and message are required' });
+//     }
+
+//     try {
+//         // Send message via WhatsApp Web
+//         const response = await client.sendMessage(`${phoneNumber}@c.us`, message);
+//         res.status(200).send({ success: true, response });
+//     } catch (error) {
+//         res.status(500).send({ success: false, error: error.message });
+//     }
+// });
+
 app.post('/send-message', async (req, res) => {
-    if (!isAuthenticated) {
-        return res.status(400).send({ error: 'WhatsApp client is not ready. Please log in first.' });
+    if (!isAuthenticated || !client) {
+        return res.status(400).send({ error: 'Client not ready. Please scan QR.' });
     }
 
     const { phoneNumber, message } = req.body;
-
     if (!phoneNumber || !message) {
         return res.status(400).send({ error: 'Phone number and message are required' });
     }
 
     try {
-        // Send message via WhatsApp Web
-        const response = await client.sendMessage(`${phoneNumber}@c.us`, message);
+        const response = await client.sendText(`${phoneNumber}@c.us`, message);
         res.status(200).send({ success: true, response });
-    } catch (error) {
-        res.status(500).send({ success: false, error: error.message });
+    } catch (err) {
+        res.status(500).send({ success: false, error: err.message });
     }
 });
 
@@ -291,38 +360,66 @@ app.post('/send-message', async (req, res) => {
 //     }
 // });
 
+// app.post('/pan-india-send-message', async (req, res) => {
+//     const message = req.body.message;
+//     const fileName = req.body.imagebase64;
+//     const phoneNumbersArray = req.body.phoneNumbersArray;
+
+//     try {
+//         if (!isAuthenticated) {
+//             return res.status(400).send({ error: 'WhatsApp client is not ready. Please log in first.' });
+//         }
+
+//         const tasks = phoneNumbersArray.map(async (phonenumber) => {
+//             const phnumber = "91" + phonenumber;
+
+//             if (fileName === "Empty") {
+//                 await client.sendMessage(`${phnumber}@c.us`, message);
+//             } else {
+//                 const base64Data = getFileAsBase64(fileName);
+//                 const media = new MessageMedia('image/png', base64Data);
+//                 await client.sendMessage(`${phnumber}@c.us`, media);
+//                 await client.sendMessage(`${phnumber}@c.us`, message);
+//             }
+//         });
+
+//         // Run all message tasks in parallel
+//         await Promise.all(tasks);
+
+//         res.status(200).send({ success: true });
+//     } catch (error) {
+//         res.status(500).send({ success: false, error: error.message });
+//     }
+// });
+
 app.post('/pan-india-send-message', async (req, res) => {
     const message = req.body.message;
     const fileName = req.body.imagebase64;
     const phoneNumbersArray = req.body.phoneNumbersArray;
 
     try {
-        if (!isAuthenticated) {
-            return res.status(400).send({ error: 'WhatsApp client is not ready. Please log in first.' });
+        if (!isAuthenticated || !client) {
+            return res.status(400).send({ error: 'Client not ready.' });
         }
 
-        const tasks = phoneNumbersArray.map(async (phonenumber) => {
-            const phnumber = "91" + phonenumber;
+        const filePath = path.join(__dirname, 'uploads', fileName);
+        const tasks = phoneNumbersArray.map(async (ph) => {
+            const phnumber = '91' + ph;
 
-            if (fileName === "Empty") {
-                await client.sendMessage(`${phnumber}@c.us`, message);
+            if (fileName === 'Empty') {
+                await client.sendText(`${phnumber}@c.us`, message);
             } else {
-                const base64Data = getFileAsBase64(fileName);
-                const media = new MessageMedia('image/png', base64Data);
-                await client.sendMessage(`${phnumber}@c.us`, media);
-                await client.sendMessage(`${phnumber}@c.us`, message);
+                await client.sendImage(`${phnumber}@c.us`, filePath, fileName, message);
             }
         });
 
-        // Run all message tasks in parallel
         await Promise.all(tasks);
-
         res.status(200).send({ success: true });
+
     } catch (error) {
         res.status(500).send({ success: false, error: error.message });
     }
 });
-
 
 
 // Function to read a file from the uploads directory and convert it to base64
@@ -354,15 +451,28 @@ app.post('/upload-image', upload.single('image'), (req, res) => {
 });
 
 // API: Logout
-app.get('/logout', (req, res) => {
+// app.get('/logout', (req, res) => {
+//     if (client) {
+//         client.logout();
+//         client.destroy(); // Disconnect WhatsApp client
+//         client = null;
+//     }
+//     isClientReady = false;
+//     isAuthenticated = false;
+//     qrCodeDataUrl = null; // Clear the QR code data
+
+//     console.log('Logged out successfully.');
+//     res.status(200).send({ success: true, message: 'Logged out successfully' });
+// });
+
+app.get('/logout', async (req, res) => {
     if (client) {
-        client.logout();
-        client.destroy(); // Disconnect WhatsApp client
+        await client.logout();
         client = null;
     }
     isClientReady = false;
     isAuthenticated = false;
-    qrCodeDataUrl = null; // Clear the QR code data
+    qrCodeDataUrl = null;
 
     console.log('Logged out successfully.');
     res.status(200).send({ success: true, message: 'Logged out successfully' });
@@ -382,8 +492,8 @@ io.on('connection', (socket) => {
     if (isAuthenticated) {
     let data = {
         scanned: true,
-        clientname : client.info.pushname,
-       clientphone : client.info.wid.user,
+    //     clientname : client.info.pushname,
+    //    clientphone : client.info.wid.user,
     }
         io.emit('whatsapp-status',data); 
     } else {
